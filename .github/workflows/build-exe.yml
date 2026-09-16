@@ -1,0 +1,35 @@
+name: Build Windows exe
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install customtkinter==5.2.2 pyinstaller==6.11.1
+
+      - name: Build exe
+        run: |
+          pyinstaller --noconfirm --clean --onefile --windowed --name WifiBoost --collect-all customtkinter src/wifiboost.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WifiBoost-windows
+          path: dist/WifiBoost.exe
+          if-no-files-found: error
